@@ -1,0 +1,130 @@
+
+header {
+  width: 100%;
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  -webkit-box-shadow: 0px 8px 17px -8px rgba(0,0,0,0.71);
+  -moz-box-shadow: 0px 8px 17px -8px rgba(0,0,0,0.71);
+  box-shadow: 0px 8px 17px -8px rgba(0,0,0,0.71);
+}
+
+.header-content {
+  width: 70%;
+}
+
+.menu {
+  float: left;
+  display: flex;
+  flex-direction: row;
+}
+
+.auth {
+  float: right;
+  display: flex;
+  flex-direction: row;
+}
+
+.auth-item {
+  margin-right: 10px;
+}
+
+.menu-item {
+  margin-right: 10px;
+}
+
+.logo {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.clickable:hover {
+  text-decoration: underline;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.body-wrapper {
+  width: 100vw;
+  height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.topic {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.body {
+  width: 400px;
+}
+
+.btn {
+  margin-top: 20px;
+}
+
+.form-group {
+  margin-top: 10px;
+}
+
+.form-check {
+  margin-top: 10px;
+}
+
+.flights {
+  height: 55vh;
+}
+
+.flight {
+  padding: 1%;
+  word-wrap: break-word;
+  display: flex;
+  flex-direction: row;
+}
+
+.flight-from {
+  margin-left: 10%;
+  word-wrap: break-word;
+  width: 20vw;
+}
+
+.flight-to {
+  word-wrap: break-word;
+  width: 20vw;
+}
+
+.flight-datetime {
+  word-wrap: break-word;
+  width: 40vw;
+}
+
+.gray {
+  background-color: rgb(194, 194, 194);
+}
+
+.form-topic {
+  font-size: 24px;
+  margin-bottom: 24px;
+}
+
+.error-topic {
+  font-size: 21px;
+  text-align: center;
+}
+
+.message-topic {
+  font-size: 21px;
+  text-align: center;
+}

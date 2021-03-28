@@ -1,0 +1,83 @@
+const sql = require("../models/db.js");
+
+function renderRoot(html, req) {
+    let accountHtml = `
+        <div class="auth">
+            <div class="auth-item clickable" onclick="window.location='/login'">Авторизация</div>
+            <div class="auth-item clickable" onclick="window.location='/register'">Регистрация</div>
+        </div>`;
+
+    if (req && req.cookies.token != null) {
+        accountHtml = `
+            <div class="auth">
+                <div class="auth-item clickable" onclick="window.location='/account'">Аккаунт</div>
+            </div>`;
+    }
+
+    if (req && req.cookies.token != null && req.cookies.admin != null) {
+        accountHtml = `
+            <div class="auth">
+                <div class="auth-item clickable" onclick="window.location='/admin'">Админ панель</div>
+                <div class="auth-item clickable" onclick="window.location='/account'">Аккаунт</div>
+            </div>`;
+    }
+
+    return `
+        <!DOCTYPE html>
+            <html lang="ru" dir="ltr">
+            <head>
+                <meta charset="utf-8">
+                <link rel="stylesheet" href="/css/bootstrap.min.css">
+                <link rel="stylesheet" href="/css/master.css">
+                <link rel="icon" href="favicon.ico">
+                <title>nodejs app</title>
+            </head>
+            <body class="content-align-center disable-selection">
+                <div class="wrapper">
+                <header>
+                    <div class="header-content">
+                        <div class="logo clickable" onclick="window.location='/'">node.js app</div>
+                        <div class="menu">
+                            <div class="menu-item clickable" onclick="window.location='/'">Главная</div>
+                            <div class="menu-item clickable">О нас</div>
+                        </div>
+                        ${accountHtml}
+                    </div>
+                </header>
+            
+                <div class="body-wrapper">
+                    ${html}
+                </div>
+
+                <script></script>
+            </body>
+        </html>`;
+}
+
+exports.renderPage = function (html, req) {
+    return renderRoot(html, req);
+}
+
+exports.renderMessage = function (topic, body, req) {
+    var body = `
+        <div class="message">
+            <div class="message-topic">${topic}</div>
+            <div class="message-body">${body}</div>
+        </div>`;
+
+    return renderRoot(body);
+}
+
+exports.renderFull = function (html) {
+    return ``;
+}
+
+exports.renderError = function (topic, body, req) {
+    var body = `
+        <div class="error">
+            <div class="error-topic">${topic}</div>
+            <div class="error-body">${body}</div>
+        </div>`;
+
+    return renderRoot(body);
+}
