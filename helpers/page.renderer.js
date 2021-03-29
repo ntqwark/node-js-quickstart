@@ -65,7 +65,7 @@ exports.renderMessage = function (topic, body, req) {
             <div class="message-body">${body}</div>
         </div>`;
 
-    return renderRoot(body);
+    return renderRoot(body, req);
 }
 
 exports.renderFull = function (html) {
@@ -79,5 +79,5 @@ exports.renderError = function (topic, body, req) {
             <div class="error-body">${body}</div>
         </div>`;
 
-    return renderRoot(body);
+    return renderRoot(body, req);
 }
