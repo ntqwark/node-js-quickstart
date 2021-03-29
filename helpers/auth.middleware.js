@@ -10,7 +10,8 @@ exports.loggedIn = async function (req, res, next) {
     try {
         let rows = await sql.query("SELECT * FROM sessions WHERE session = ?", token);
 
-        if (rows.length == 0) { 
+        if (rows.length == 0) {
+            res.clearCookie("token");
             res.clearCookie("admin");
             return res.status(400).send(renderError("Ошибка", "Сессия устарела!", req));
         }
@@ -35,6 +36,7 @@ exports.adminOnly = async function (req, res, next) {
 
         if (rows.length == 0) {
             res.clearCookie("token");
+            res.clearCookie("admin");
             return res.status(400).send(renderError("Ошибка", "Сессия устарела!", req));
         }
 
