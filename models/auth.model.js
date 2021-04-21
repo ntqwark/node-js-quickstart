@@ -10,6 +10,16 @@ class Auth {
     
         return session;
     };
+
+    static async removeSession(token) {
+        await sql.query("DELETE FROM `sessions` WHERE `sessions`.`session` = ?", token);
+    };
+
+    static async verifySession(token) {
+        let rows = await sql.query("SELECT * FROM sessions WHERE session = ?", token);
+
+        return rows.length > 0;
+    }
 }
 
 module.exports = Auth;

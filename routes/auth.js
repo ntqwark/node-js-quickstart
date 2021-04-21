@@ -5,8 +5,9 @@ const User = require("../models/user.model.js");
 const Auth = require("../models/auth.model.js");
 const config = require("../config/config");
 
-const { renderPage, renderMessage, renderError } = require("../helpers/page.renderer.js");
-const { unauthorizedOnly } = require("../helpers/auth.middleware.js");
+const { renderForm, renderMessage, renderError } = require("../helpers/page.renderer.js");
+const { unauthorizedOnly, loggedIn } = require("../helpers/auth.middleware.js");
+const { log } = require("../helpers/todb.logger.js");
 
 // Регистрация подьзователей
 router.post('/register', unauthorizedOnly, async (req, res) => {
@@ -31,6 +32,7 @@ router.post('/register', unauthorizedOnly, async (req, res) => {
         user.id = id;
         delete user.password;
 
+        log(user.id, `User registered (id ${user.id})`);
         res.send(renderMessage("Информация", "Пользователь успешно зарегестрирован!", req));
     } catch (err) {
         console.log(err);
@@ -54,10 +56,15 @@ router.post("/login", unauthorizedOnly, async (req, res) => {
             let session = await Auth.createSession(user);
 
             res.cookie("token", session);
+            req.cookies.token = session;
 
-            if (user.status == 1000)
+            if (user.status > 10) {
+                req.cookies.admin = true;
                 res.cookie("admin", "true");
+            }
 
+            log(user.id, `User logged in (id ${user.id})`);
+            res.cookie("nickname", user.name);
             res.send(renderMessage("Информация", "Успешно авторизован!", req));
         } else {
             res.status(500).send(renderError("Ошибка", "Пользователь с указаным email не найден", req));
@@ -70,61 +77,55 @@ router.post("/login", unauthorizedOnly, async (req, res) => {
 
 // Страница регистрации
 router.get('/register', unauthorizedOnly, async (req, res) => {
-    var body = `
-        <div class="body">
-            <div class="register-from">
-                <div class="form-topic">Регистрация</div>
-                <div class="add-book-form-body">
-                    <form method="post">
-                        <div class="mb-3">
-                            <label for="exampleInputEmail1" class="form-label">Email address</label>
-                            <input name="email" type="email" class="form-control" aria-describedby="emailHelp">
-                            <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="exampleInputEmail1" class="form-label">Nickname</label>
-                            <input name="name" type="text" class="form-control" aria-describedby="nickname">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Password</label>
-                            <input name="password" type="password" class="form-control">
-                        </div>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input">
-                            <label name="gay" class="form-check-label">Я гей!</label>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
-                    </form>
+    let html = `
+        <div class="register-from">
+            <form method="post">
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Email address</label>
+                    <input name="email" type="email" class="form-control" aria-describedby="emailHelp">
+                    <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
                 </div>
-            </div>
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Nickname</label>
+                    <input name="name" type="text" class="form-control" aria-describedby="nickname">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input name="password" type="password" class="form-control">
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input">
+                    <label name="gay" class="form-check-label">Я гей!</label>
+                </div>
+                <div class="buttons-group">
+                    <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+                </div>
+            </form>
         </div>`;
 
-    res.send(renderPage(body, req));
+    res.send(renderForm("Регистрация", html, req));
 });
 
 // Страница авторизации
 router.get('/login', unauthorizedOnly, async (req, res) => {
-    var body = `
-        <div class="body">
-            <div class="login-from">
-                <div class="form-topic">Авторизация</div>
-                <div class="add-book-form-body">
-                    <form method="post">
-                        <div class="mb-3">
-                            <label for="exampleInputEmail1" class="form-label">Email address</label>
-                            <input name="email" type="email" class="form-control" aria-describedby="emailHelp">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Password</label>
-                            <input name="password" type="password" class="form-control">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Авторизироваться</button>
-                    </form>
+    let html = `
+        <div class="login-from">
+            <form method="post">
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Email address</label>
+                    <input name="email" type="email" class="form-control" aria-describedby="emailHelp">
                 </div>
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input name="password" type="password" class="form-control">
+                </div>
+                <div class="buttons-group">
+                    <button type="submit" class="btn btn-primary">Авторизироваться</button>
+                </div>
+            </form>
         </div>`;
 
-    res.send(renderPage(body, req));
+    res.send(renderForm("Авторизация", html, req));
 });
 
 module.exports = router;

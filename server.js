@@ -15,13 +15,16 @@ app.use(bodyParser.urlencoded({
 }));
 
 const { loggedIn, adminOnly, unauthorizedOnly } = require("./helpers/auth.middleware.js");
-
+const { renderPage, renderMessage, renderError } = require("./helpers/page.renderer.js");
 
 
 // Импорт маршрутов
 const authRoute = require('./routes/auth');
 const homeRoute = require('./routes/home');
+const accountRoute = require('./routes/account');
 
+const adminRoute = require('./routes/admin');
+const adminUsersRoute = require('./routes/admin.users')
 
 
 // Применение маршрутизации
@@ -30,12 +33,13 @@ const homeRoute = require('./routes/home');
 app.use('/', authRoute);
 // Маршрутизация главной страницы
 app.use('/', homeRoute);
+// Маршрутизация страницы об аккаунте
+app.use('/account', loggedIn, accountRoute);
+// Маршрутизация страниц администрирования
+app.use('/admin', adminOnly, adminRoute);
 
+app.use('/admin/users', adminOnly, adminUsersRoute);
 
-
-app.use('/admin', adminOnly, (req, res) => { res.send('hello admin!'); });
-
-app.use('/account', loggedIn, (req, res) => { res.send('hello user!'); });
 
 app.listen(8000, () => console.log('Server is running'));
 

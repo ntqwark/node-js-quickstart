@@ -1,5 +1,22 @@
 const sql = require("./db.js");
 
+function applyRole(user) {
+    if (!user || !user.status)
+        return;
+
+    if (user.status == 0)
+        user.role = "Banned";
+    else if (user.status == 1)
+        user.role = "User";
+    else if (user.status == 1000)
+        user.role = "Root Admin";
+    else if (user.status > 10) {
+        user.role = `Admin ${user.status - 10}-lvl`;
+    } else {
+        user.role = "Upgraded User";
+    }
+}
+
 // Конструктор
 class User {
     constructor(user) {
@@ -36,16 +53,82 @@ class User {
         return insert.insertId;
     }
 
+    static async getAllUsers() {
+        let rows = await sql.query("SELECT * FROM users");
+
+        for (const item of rows) {
+            applyRole(item);
+        }
+        
+        return rows;
+    }
+
+    static async getById(id) {
+        if (!id) throw "ID field is not specified";
+
+        let rows = await sql.query("SELECT * FROM users WHERE id = ?", id);
+
+        if (rows.length > 0) {
+            let user = rows[0];
+            applyRole(user);
+            return user;
+        } else throw `Пользователь с id ${id} не найден`;
+    }
+
     static async getByEmail(email) {
         if (!email) throw "Email field is not specified";
         
         // Запрос пользователя из БД
         let rows = await sql.query('SELECT * FROM users WHERE email = ?', email);
         
-        if (rows.length > 0)
-            return rows[0];
-        else
-            return null;
+        if (rows.length > 0) {
+            let user = rows[0];
+            applyRole(user);
+            return user;
+        } else return null;
+    }
+
+    // Получение пользователя по его токену авторизации
+    static async getByToken(token) {
+        if (!token) throw "Token is not specified";
+
+        let rows = await sql.query(`
+            SELECT users.id, email, name, status FROM users
+            INNER JOIN sessions
+            ON users.id = sessions.userid
+            WHERE session = ?`, token);
+
+        if (rows.length == 0)
+            throw "User with specified token not found";
+
+
+        let user = rows[0];
+        applyRole(user);
+        return user;
+    }
+
+    static async updateUser(_user) {
+        // Создаем копию объекта
+        let user = Object.assign({}, _user);
+        
+        if (!user) throw "updateUser func: user is null!";
+        
+        let id = user.id;
+        delete user.id;
+
+        let userPrevEmail = await sql.query("SELECT * FROM users WHERE id = ?", id);
+
+        // Занят ли указываемый новый EMAIL?
+        if (userPrevEmail.length > 0 && userPrevEmail[0].email != user.email)
+        {
+            let rows = await sql.query("SELECT * FROM users WHERE email = ?", user.email);
+
+            if (rows.length > 0)
+                throw "Указанный email занят";
+        }
+
+        // Если нет - обновляем информацию в БД
+        await sql.query("UPDATE users SET ? WHERE id = ?", [user, id]);
     }
 }
 

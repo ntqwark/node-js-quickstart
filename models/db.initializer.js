@@ -27,6 +27,8 @@ async function initDatabase(sql) {
             name VARCHAR(128) NOT NULL,
             password VARCHAR(256) NOT NULL,
             status INT NOT NULL DEFAULT 1,
+            lastedit DATETIME ON UPDATE CURRENT_TIMESTAMP DEFAULT NOW(),
+            created DATETIME DEFAULT NOW(),
             PRIMARY KEY(id)
         ) 
         ENGINE = InnoDB;
@@ -39,8 +41,22 @@ async function initDatabase(sql) {
             id INT NOT NULL AUTO_INCREMENT,
             userid VARCHAR(128) NOT NULL,
             session VARCHAR(128) NOT NULL,
+            lastedit DATETIME ON UPDATE CURRENT_TIMESTAMP DEFAULT NOW(),
             PRIMARY KEY(id)
         )
+        ENGINE = InnoDB;
+    `);
+
+    // Инициализация таблицы действий
+    await initTable(sql, 'actions', 
+    `   CREATE TABLE actions
+        (
+            actionid INT NOT NULL AUTO_INCREMENT,
+            userid INT NOT NULL,
+            actiondesk TEXT NOT NULL,
+            actiondate DATETIME DEFAULT NOW(),
+            PRIMARY KEY(actionid)
+        ) 
         ENGINE = InnoDB;
     `);
 

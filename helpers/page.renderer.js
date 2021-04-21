@@ -10,7 +10,7 @@ function renderRoot(html, req) {
     if (req && req.cookies.token != null) {
         accountHtml = `
             <div class="auth">
-                <div class="auth-item clickable" onclick="window.location='/account'">Аккаунт</div>
+                <div class="auth-item clickable" onclick="window.location='/account'">${req.cookies.nickname}</div>
             </div>`;
     }
 
@@ -18,7 +18,7 @@ function renderRoot(html, req) {
         accountHtml = `
             <div class="auth">
                 <div class="auth-item clickable" onclick="window.location='/admin'">Админ панель</div>
-                <div class="auth-item clickable" onclick="window.location='/account'">Аккаунт</div>
+                <div class="auth-item clickable" onclick="window.location='/account'">${req.cookies.nickname}</div>
             </div>`;
     }
 
@@ -54,6 +54,10 @@ function renderRoot(html, req) {
         </html>`;
 }
 
+function renderFull(html, req) {
+    return renderRoot(`<div class="full">${html}</div>`, req);
+}
+
 exports.renderPage = function (html, req) {
     return renderRoot(html, req);
 }
@@ -65,11 +69,7 @@ exports.renderMessage = function (topic, body, req) {
             <div class="message-body">${body}</div>
         </div>`;
 
-    return renderRoot(body, req);
-}
-
-exports.renderFull = function (html) {
-    return ``;
+    return renderFull(body, req);
 }
 
 exports.renderError = function (topic, body, req) {
@@ -79,5 +79,21 @@ exports.renderError = function (topic, body, req) {
             <div class="error-body">${body}</div>
         </div>`;
 
+    return renderFull(body, req);
+}
+
+exports.renderForm = function (topic, formHtml, req, prevFormHtml = "") {
+    var body = `
+        <div class="main-form-wrapper">
+            ${prevFormHtml}
+            <div class="main-form-topic">${topic}</div>
+            <div class="main-form">
+                ${formHtml}
+            </div>
+        </div>`;
+
     return renderRoot(body, req);
 }
+
+module.exports.renderFull = renderFull;
+module.exports.renderRoot = renderRoot;
