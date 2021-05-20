@@ -9,6 +9,20 @@ const { renderForm, renderMessage, renderError } = require("../helpers/page.rend
 const { unauthorizedOnly, loggedIn } = require("../helpers/auth.middleware.js");
 const { log } = require("../helpers/todb.logger.js");
 
+async function proceedAuth(req, res, user) {
+    let session = await Auth.createSession(user);
+
+    res.cookie("token", session);
+    req.cookies.token = session;
+
+    if (user.status > 10) {
+        req.cookies.admin = true;
+        res.cookie("admin", "true");
+    }
+
+    res.cookie("nickname", user.name);
+}
+
 // Регистрация подьзователей
 router.post('/register', unauthorizedOnly, async (req, res) => {
     if (req.body == undefined || req.body.password == undefined)
@@ -32,8 +46,15 @@ router.post('/register', unauthorizedOnly, async (req, res) => {
         user.id = id;
         delete user.password;
 
-        log(user.id, `User registered (id ${user.id})`);
-        res.send(renderMessage("Информация", "Пользователь успешно зарегестрирован!", req));
+        await proceedAuth(req, res, user);
+
+        res.render("forms/message", {
+            req: req,
+            formTopic: "Вы успешно зарегистрировались",
+            submitText: "ОК",
+            backHref: "/",
+            formAction: "/account"
+        });
     } catch (err) {
         console.log(err);
         res.status(500).send(renderError("Ошибка", err, req));
@@ -51,21 +72,23 @@ router.post("/login", unauthorizedOnly, async (req, res) => {
 
             // Проверка пароля
             const validPass = await bcrypt.compare(req.body.password, user.password);
-            if (!validPass) return res.status(400).send(renderError("Ошибка", "Указан неверный пароль", req));
+            if (!validPass) return res.status(400).render("forms/message", {
+                                        req: req,
+                                        formTopic: "Вы ввели неправильный пароль",
+                                        submitText: "ОК",
+                                        backHref: "/",
+                                        formAction: "/login"
+                                    });
 
-            let session = await Auth.createSession(user);
+            await proceedAuth(req, res, user);
 
-            res.cookie("token", session);
-            req.cookies.token = session;
-
-            if (user.status > 10) {
-                req.cookies.admin = true;
-                res.cookie("admin", "true");
-            }
-
-            log(user.id, `User logged in (id ${user.id})`);
-            res.cookie("nickname", user.name);
-            res.send(renderMessage("Информация", "Успешно авторизован!", req));
+            res.render("forms/message", {
+                req: req,
+                formTopic: "Вы успешно авторизировались",
+                submitText: "ОК",
+                backHref: "/",
+                formAction: "/account"
+            });
         } else {
             res.status(500).send(renderError("Ошибка", "Пользователь с указаным email не найден", req));
         }

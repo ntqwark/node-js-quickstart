@@ -2,9 +2,9 @@
   "name": "genius-app",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node main.js",
+    "start": "node server.js",
     "test": "start http://localhost:1000 && node main.js"
   },
   "author": "",
@@ -16,6 +16,7 @@
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "express-handlebars": "^5.3.2",
     "md5": "^2.3.0",
     "morgan": "^1.10.0",
     "mysql": "^2.18.1"

@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
     else
         html = `<a href="/" style="font-size:228px; text-decoration: none; color: black;">ТЫ ГЕЙЛОРД</a>`;
 
-    res.send(renderFull(html, req));
+    res.render("index", { req: req });
 });
 
 module.exports = router;

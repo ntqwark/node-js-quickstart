@@ -83,42 +83,9 @@ router.post("/edit", loggedIn, async (req, res) => {
 });
 
 router.get('/', async (req, res) => {
-
-    let tBodyHtml = "";
     let users = await User.getAllUsers();
 
-    for (const user of users)
-    {
-        tBodyHtml += `
-            <tr class="showhide">
-                <td>${user.email}</td>
-                <td>${user.name}</td>
-                <td>${user.role}</td>
-                <td><a href="/admin/users/edit?id=${user.id}" style="margin-right: 10px">Изменить</a><a href="/">Удалить</a></td>
-            </tr>
-            `;
-    }
-
-    let bodyHtml = `
-        <div class="admin-topic">Пользователи</div>
-        <table class="users-table sortable">
-            <thead>
-                <tr>
-                    <th class="clickable disable-select">Email</th>
-                    <th class="clickable disable-select">Nickname</th>
-                    <th class="clickable disable-select">Role</th>
-                    <th class="clickable disable-select">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${tBodyHtml}
-            </tbody>
-        </table>
-        <script>
-            ${sortFunc}
-        </script>`;
-
-    res.send(renderPage(bodyHtml, req));
+    res.render("admin/users", { req: req, users: users });
 });
 
 router.get('/edit:id?', async (req, res) => {

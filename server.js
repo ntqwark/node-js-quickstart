@@ -3,8 +3,17 @@ const config = require("./config/config.js");
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const handlebars = require('express-handlebars');
 
 const app = express();
+
+app.engine(
+    'handlebars',
+    handlebars({ defaultLayout: 'main' })
+);
+
+app.set('views', './views');
+app.set('view engine', 'handlebars');
 
 app.use(express.static(__dirname + '/public'));
 app.use(express.json());
@@ -41,5 +50,5 @@ app.use('/admin', adminOnly, adminRoute);
 app.use('/admin/users', adminOnly, adminUsersRoute);
 
 
-app.listen(8000, () => console.log('Server is running'));
+app.listen(config.APP_PORT, () => console.log(`Server is running on ${config.APP_PORT}`));
 

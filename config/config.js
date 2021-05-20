@@ -3,7 +3,8 @@ module.exports = {
     DB_USER: "root",
     DB_PASSWORD: "root",
     DB_NAME: "app",
-    COOKIES_SECRET: "COOKIES_SECRET_1491294919912"
+    COOKIES_SECRET: "COOKIES_SECRET_1491294919912",
+    APP_PORT: 8000
 };
 
 /*

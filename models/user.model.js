@@ -10,11 +10,10 @@ function applyRole(user) {
         user.role = "User";
     else if (user.status == 1000)
         user.role = "Root Admin";
-    else if (user.status > 10) {
+    else if (user.status > 10)
         user.role = `Admin ${user.status - 10}-lvl`;
-    } else {
+    else 
         user.role = "Upgraded User";
-    }
 }
 
 // Конструктор

@@ -15,6 +15,11 @@ header {
   width: 70%;
 }
 
+.master-container {
+    margin-top: 100px;
+    margin-left: 15%;
+}
+
 .menu {
   float: left;
   display: flex;

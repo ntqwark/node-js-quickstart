@@ -1,0 +1,21 @@
+<div class="main-form-wrapper">
+    <div class="main-form-topic">{{formTopic}}</div>
+    <div class="account-form">
+        <div class="edit-account-form-body">
+            <form method="post" action="{{formAction}}">
+                <div class="buttons-group">
+                    {{#if backHref}}
+                    <a href="{{backHref}}" class="btn gray" style="margin-right: 5px">Назад</a>
+                    {{else}}
+                    <a href="/account" class="btn gray" style="margin-right: 5px">Назад</a>
+                    {{/if}}
+                    {{#if submitText}}
+                    <button type="submit" class="btn btn-primary">{{submitText}}</button>
+                    {{else}}
+                    <button type="submit" class="btn btn-primary">Подтвердить</button>
+                    {{/if}}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

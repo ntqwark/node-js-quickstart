@@ -1,0 +1,30 @@
+<div class="main-form-wrapper">
+    {{#if isEdited}}
+    <div style="background-color: lightgreen; display: inline-block;">Аккаунт успешно изменен</div>
+    {{/if}}
+    <div class="main-form-topic">Ваш аккаунт</div>
+    <div class="main-form">
+        <div class="account-form">
+            <div class="edit-account-form-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email address</label>
+                        <input name="email" type="email" class="form-control" aria-describedby="emailHelp" value="{{user.email}}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nickname</label>
+                        <input name="name" type="text" class="form-control" aria-describedby="nickname" value="{{user.name}}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <input name="status" type="text" class="form-control showhide" readonly value="{{user.status}}">
+                    </div>
+                    <div class="buttons-group">
+                        <a href="/account" class="btn gray" style="margin-right: 5px">Назад</a>
+                        <button type="submit" class="btn btn-primary">Отправить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
