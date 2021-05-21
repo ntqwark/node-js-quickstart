@@ -1,16 +1,19 @@
 const router = require('express').Router();
+module.exports = router;
+module.exports.routeName = "/admin";
+
 const User = require("../models/user.model.js");
 const Auth = require("../models/auth.model.js");
 const sql = require("../models/db.js");
 
 const { renderPage, renderError, renderForm, renderMessage } = require("../helpers/page.renderer.js");
-const { unauthorizedOnly, loggedIn } = require("../helpers/auth.middleware.js");
+const { loggedIn, adminOnly, unauthorizedOnly } = require("../helpers/auth.middleware");
 
 const usersRoute = require('./admin.users.js');
 
 // 
 
-router.get('/', async (req, res) => {
+router.get('/', adminOnly, async (req, res) => {
     let bodyHtml = `
         <div class="admin-panel page-margin">
             <a href="/admin/users" class="admin-panel-button" style="background-color: lightgreen">Пользователи</a>
@@ -20,7 +23,7 @@ router.get('/', async (req, res) => {
     res.send(renderPage(bodyHtml, req));
 })
 
-router.get('/raw-log:id?', async (req, res) => {
+router.get('/raw-log:id?', adminOnly, async (req, res) => {
     try {
         let rows = await sql.query("SELECT * FROM actions WHERE actionid = ?", req.query.id);
         let log = rows[0];
@@ -32,7 +35,7 @@ router.get('/raw-log:id?', async (req, res) => {
     } catch (err) { res.send(err); }
 })
 
-router.get('/log:page?', async (req, res) => {
+router.get('/log:page?', adminOnly, async (req, res) => {
     let page = req.query.page;
 
     const rows = await sql.query("SELECT MAX(actionid) 'id' FROM actions");

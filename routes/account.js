@@ -1,4 +1,6 @@
 const router = require('express').Router();
+module.exports = router;
+module.exports.routeName = "/account";
 
 const User = require("../models/user.model.js");
 const Auth = require("../models/auth.model.js");
@@ -53,7 +55,7 @@ router.post("/edit", loggedIn, async (req, res) => {
 });
 
 // [GET] Просмотр аккаунта пользователя
-router.get('/', async (req, res) => {
+router.get('/', loggedIn, async (req, res) => {
     let user = null;
 
     try {
@@ -64,7 +66,7 @@ router.get('/', async (req, res) => {
 });
 
 // [GET] Изменение аккаунта пользователя
-router.get('/edit', async (req, res) => {
+router.get('/edit', loggedIn, async (req, res) => {
     let user = null;
 
     try {
@@ -75,7 +77,7 @@ router.get('/edit', async (req, res) => {
 });
 
 // [GET] Завершение сессии
-router.get('/logout', async (req, res) => {
+router.get('/logout', loggedIn, async (req, res) => {
     res.render("forms/submit", {
         req: req,
         formTopic: "Вы действительно хотите выйти?",

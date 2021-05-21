@@ -1,4 +1,7 @@
 const router = require('express').Router();
+module.exports = router;
+module.exports.routeName = "/";
+
 const bcrypt = require('bcrypt');
 
 const User = require("../models/user.model.js");
@@ -150,5 +153,3 @@ router.get('/login', unauthorizedOnly, async (req, res) => {
 
     res.send(renderForm("Авторизация", html, req));
 });
-
-module.exports = router;

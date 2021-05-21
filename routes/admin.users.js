@@ -1,4 +1,7 @@
 const router = require('express').Router();
+module.exports = router;
+module.exports.routeName = "/admin/users";
+
 const User = require("../models/user.model.js");
 const Auth = require("../models/auth.model.js");
 

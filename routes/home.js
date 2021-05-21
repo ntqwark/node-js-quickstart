@@ -1,4 +1,6 @@
 const router = require('express').Router();
+module.exports = router;
+module.exports.routeName = "/";
 
 const { renderFull } = require("../helpers/page.renderer.js");
 

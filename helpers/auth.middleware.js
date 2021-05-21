@@ -7,7 +7,13 @@ const { renderPage, renderMessage, renderError } = require("../helpers/page.rend
 
 exports.loggedIn = async function (req, res, next) {
     let token = req.cookies.token;
-    if (!token) return res.status(401).send(renderError("Ошибка", "Для просмотра этой страницы необходимо быть авторизированным", req));
+    if (!token) return res.status(401).render("forms/message", {
+        req: req,
+        formTopic: `Доступ запрещен: необходимо быть авторизированным`,
+        submitText: "ОК",
+        backHref: "/",
+        formAction: "/"
+    });
 
     try {
         let verified = await Auth.verifySession(token);
@@ -15,7 +21,14 @@ exports.loggedIn = async function (req, res, next) {
         if (!verified) {
             res.clearCookie("token");
             res.clearCookie("admin");
-            return res.status(400).send(renderError("Ошибка", "Сессия устарела!", req));
+
+            return res.render("forms/message", {
+                req: req,
+                formTopic: "Ваша сессия недействительна. Пройдите авторизацию повторно",
+                submitText: "ОК",
+                backHref: "/",
+                formAction: "/"
+            });
         }
         
         next();
@@ -27,7 +40,13 @@ exports.loggedIn = async function (req, res, next) {
 
 exports.adminOnly = async function (req, res, next) {
     let token = req.cookies.token;
-    if (!token) return res.status(401).send("Access Denied");
+    if (!token) return res.status(401).render("forms/message", {
+        req: req,
+        formTopic: `Доступ запрещен: необходимо быть авторизированным`,
+        submitText: "ОК",
+        backHref: "/",
+        formAction: "/"
+    });
 
     try {
         let rows = await sql.query
@@ -39,18 +58,40 @@ exports.adminOnly = async function (req, res, next) {
         if (rows.length == 0) {
             res.clearCookie("token");
             res.clearCookie("admin");
-            return res.status(400).send(renderError("Ошибка", "Сессия устарела!", req));
+            
+            return res.render("forms/message", {
+                req: req,
+                formTopic: "Ваша сессия недействительна. Пройдите авторизацию повторно",
+                submitText: "ОК",
+                backHref: "/",
+                formAction: "/"
+            });
         }
 
         if (rows[0].status <= 10) {
             res.clearCookie("admin");
-            return res.status(400).send(renderError("Ошибка", "Доступ запрещен", req));
-        } 
+            return res.render("forms/message", {
+                req: req,
+                formTopic: "Доступ запрещен: Вы не являетесь администратором",
+                submitText: "ОК",
+                backHref: "/",
+                formAction: "/"
+            });
+        } else {
+            req.cookies.admin = true;
+            res.cookie("admin", "true");
+        }
         
         next();
     }
     catch (err) {
-        res.status(400).send(err);
+        res.render("forms/message", {
+            req: req,
+            formTopic: `Ошибка: ${JSON.stringify(err)}`,
+            submitText: "ОК",
+            backHref: "/",
+            formAction: "/"
+        });
     }
 }
 
@@ -60,11 +101,56 @@ exports.unauthorizedOnly = async function (req, res, next) {
 
     try {
         let rows = await sql.query("SELECT * FROM sessions WHERE session = ?", token);
-        if (rows.length != 0) { return res.status(400).send(renderError("Ошибка", "Вы уже авторизированы!", req)); }
+
+        if (rows.length != 0) {
+             return  res.render("forms/message", {
+                req: req,
+                formTopic: `Ошибка: Вы уже авторизированы`,
+                submitText: "ОК",
+                backHref: "/",
+                formAction: "/account"
+            });
+        }
         
         next();
     }
     catch (err) {
-        res.status(400).send(err);
+        res.render("forms/message", {
+            req: req,
+            formTopic: `Ошибка: ${JSON.stringify(err)}`,
+            submitText: "ОК",
+            backHref: "/",
+            formAction: "/"
+        });
+    }
+}
+
+exports.updateCookies = async function (req, res, next) {
+    let token = req.cookies.token;
+    if (!token) return next();
+
+    try {
+        let rows = await sql.query("SELECT * FROM sessions WHERE session = ?", token);
+
+        if (rows.length != 0) {
+             return  res.render("forms/message", {
+                req: req,
+                formTopic: `Ошибка: Вы уже авторизированы`,
+                submitText: "ОК",
+                backHref: "/",
+                formAction: "/account"
+            });
+        }
+        
+        next();
+    }
+    catch (err) {
+        res.render("forms/message", {
+            req: req,
+            formTopic: `Ошибка: ${JSON.stringify(err)}`,
+            submitText: "ОК",
+            backHref: "/",
+            formAction: "/"
+        });
     }
 }

@@ -1,4 +1,5 @@
 const config = require("./config/config.js");
+const { promises: fs } = require("fs");
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -23,32 +24,43 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-const { loggedIn, adminOnly, unauthorizedOnly } = require("./helpers/auth.middleware.js");
-const { renderPage, renderMessage, renderError } = require("./helpers/page.renderer.js");
-
-
-// Импорт маршрутов
-const authRoute = require('./routes/auth');
-const homeRoute = require('./routes/home');
-const accountRoute = require('./routes/account');
-
-const adminRoute = require('./routes/admin');
-const adminUsersRoute = require('./routes/admin.users')
-
 
 // Применение маршрутизации
 
-// Маршрутизация авторизации и регистрации
-app.use('/', authRoute);
-// Маршрутизация главной страницы
-app.use('/', homeRoute);
-// Маршрутизация страницы об аккаунте
-app.use('/account', loggedIn, accountRoute);
-// Маршрутизация страниц администрирования
-app.use('/admin', adminOnly, adminRoute);
+async function initializeRoutes(directory = './routes') {
+    let count = 0;
 
-app.use('/admin/users', adminOnly, adminUsersRoute);
+    try {
+        let files = await fs.readdir(directory);
+
+        for (file of files) {
+            let stat = await fs.stat(`${directory}/${file}`);
+
+            if (stat.isDirectory()) {
+                count += await initializeRoutes(`${directory}/${file}`);
+            } else if (stat.isFile()) {
+                let route = require(`././${directory}/${file}`);
+                app.use(route.routeName, route);
+
+                count++;
+            }
+        }
+    } catch (e) {
+        console.log("Error on routes initializing:")
+        console.error(e);
+    }
+
+    return count;
+}
+
+async function main() {
+    let routesCount = await initializeRoutes();
+    console.log(`Successfully loaded ${routesCount} routes.`);
+
+    app.listen(config.APP_PORT, () => console.log(`Server is running on ${config.APP_PORT}`));
+}
+
+main();
 
 
-app.listen(config.APP_PORT, () => console.log(`Server is running on ${config.APP_PORT}`));
 
