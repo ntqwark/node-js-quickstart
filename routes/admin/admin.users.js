@@ -2,12 +2,12 @@ const router = require('express').Router();
 module.exports = router;
 module.exports.routeName = "/admin/users";
 
-const User = require("../models/user.model.js");
-const Auth = require("../models/auth.model.js");
+const User = require("../../models/user.model.js");
+const Auth = require("../../models/auth.model.js");
 
-const { log } = require("../helpers/todb.logger.js");
-const { renderPage, renderError, renderForm, renderMessage } = require("../helpers/page.renderer.js");
-const { unauthorizedOnly, loggedIn } = require("../helpers/auth.middleware.js");
+const { log } = require("../../helpers/todb.logger.js");
+const { renderPage, renderError, renderForm, renderMessage } = require("../../helpers/page.renderer.js");
+const { unauthorizedOnly, loggedIn } = require("../../helpers/auth.middleware.js");
 
 const sortFunc = `
     document.addEventListener('DOMContentLoaded', () => {
@@ -80,13 +80,23 @@ router.post("/edit", loggedIn, async (req, res) => {
         res.redirect(`/admin/users/edit?id=${req.query.id}&edited=true`);
     }
     catch (err) {
-        res.status(500).send(renderError("Ошибка", err, req));
-        console.log(err);
+        return res.status(401).render("error", {
+            req: req,
+            errorText: err
+        });
     }
 });
 
 router.get('/', async (req, res) => {
-    let users = await User.getAllUsers();
+    let users = null;
+
+    try { users = await User.getAllUsers(); }
+    catch (err) {
+        return res.status(401).render("error", {
+            req: req,
+            errorText: err
+        });
+    }
 
     res.render("admin/users", { req: req, users: users });
 });
@@ -95,54 +105,40 @@ router.get('/edit:id?', async (req, res) => {
     let user = null;
     let sessionUser = null;
 
-    let id = req.query.id;
-    let prevHtml = "";
-
-    if (req.query.edited) {
-        prevHtml = `<div style="background-color: lightgreen; display: inline-block;">Аккаунт успешно изменен</div>`;
-    }
-
     try {
-        user = await User.getById(id);
+        user = await User.getById(req.query.id);
         sessionUser = await User.getByToken(req.cookies.token);
-    } catch (err) { return res.send(renderError("Ошибка", err, req)); }
+    } catch (err) {
+        return res.status(401).render("error", {
+            req: req,
+            errorText: err
+        });
+    }
 
     if (user.status >= sessionUser.status && user.id != sessionUser.id)
         return res.send(renderError("Ошибка", "Вы не можете редактировать данные этого аккаунта", req));
 
-    let canEditStatus = (user.status <= sessionUser.status);
-    let editStatusHtml = "readonly";
+    res.render("admin/users/edit", { req: req, user: user, isEdited: req.query.edited, backHref: req.query.backHref });
+});
 
-    if (canEditStatus) {
-        editStatusHtml = "";
+router.get("/view:id?", async (req, res) => {
+    let user = null;
+    let sessionUser = null;
+
+    try {
+        user = await User.getById(req.query.id);
+        sessionUser = await User.getByToken(req.cookies.token);
+    } catch (err) {
+        return res.status(401).render("error", {
+            req: req,
+            errorText: err
+        });
     }
 
-    let html = `
-        <div class="account-form">
-            <div class="edit-account-form-body">
-                <form method="post">
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email address</label>
-                        <input name="email" type="email" class="form-control" aria-describedby="emailHelp" value="${user.email}">
-                    </div>
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Nickname</label>
-                        <input name="name" type="text" class="form-control" aria-describedby="nickname" value="${user.name}">
-                    </div>
-                    <div class="mb-3">
-                        <label for="status" class="form-label">Status</label>
-                        <input name="status" type="text" class="form-control showhide" ${editStatusHtml} value="${user.status}">
-                        <div class="hide" style="padding-left: 10px; padding-top: 4px;">Previous Role: ${user.role}</div>
-                    </div>
-                    <div class="buttons-group">
-                        <a href="/admin/users" class="btn gray" style="margin-right: 5px">Назад</a>
-                        <button type="submit" class="btn btn-primary">Отправить</button>
-                    </div>
-                </form>
-            </div>
-        </div> `;
+    if (user.status >= sessionUser.status && user.id != sessionUser.id)
+        return res.send(renderError("Ошибка", "Вы не можете просмотреть данные этого аккаунта", req));
 
-    res.send(renderForm("Изменить аккаунт (как администратор)", html, req, prevHtml));
-});
+    res.render("admin/users/view", { req: req, user: user, isEdited: req.query.edited, backHref: req.query.backHref });
+})
 
 module.exports = router;

@@ -30,7 +30,10 @@ router.post("/logout", loggedIn, async (req, res) => {
         });
     }
     catch (err) {
-        res.status(500).send(renderError("ERR", err, req));
+        return res.status(401).render("error", {
+            req: req,
+            errorText: err
+        });
     }
 });
 
@@ -50,7 +53,10 @@ router.post("/edit", loggedIn, async (req, res) => {
         res.redirect("/account?edited=true");
     }
     catch (err) {
-        res.status(500).send(renderError("Ошибка", err, req));
+        return res.status(401).render("error", {
+            req: req,
+            errorText: err
+        });
     }
 });
 
@@ -59,8 +65,13 @@ router.get('/', loggedIn, async (req, res) => {
     let user = null;
 
     try {
-        user = await User.getByToken(req.cookies.token); 
-    } catch (err) { return res.send(err); }
+        user = await User.getByToken(req.cookies.token);
+    } catch (err) {
+        return res.status(401).render("error", {
+            req: req,
+            errorText: err
+        });
+    }
 
     res.render("account/index", { req: req, user: user, isEdited: req.query.edited });
 });
@@ -71,7 +82,12 @@ router.get('/edit', loggedIn, async (req, res) => {
 
     try {
         user = await User.getByToken(req.cookies.token);
-    } catch (err) { return res.send(err); }
+    } catch (err) {
+        return res.status(401).render("error", {
+            req: req,
+            errorText: err
+        });
+    }
 
     res.render("account/edit", { req: req, user: user, isEdited: req.query.edited });
 });

@@ -59,9 +59,11 @@ router.post('/register', unauthorizedOnly, async (req, res) => {
             formAction: "/account"
         });
     } catch (err) {
-        console.log(err);
-        res.status(500).send(renderError("Ошибка", err, req));
-    }    
+        return res.status(401).render("error", {
+            req: req,
+            errorText: err
+        });
+    }
 });
 
 // Авторизация пользователей
@@ -93,63 +95,29 @@ router.post("/login", unauthorizedOnly, async (req, res) => {
                 formAction: "/account"
             });
         } else {
-            res.status(500).send(renderError("Ошибка", "Пользователь с указаным email не найден", req));
+            return res.status(400).render("forms/message", {
+                req: req,
+                formTopic: "Пользователь с указаной почтой не найден",
+                submitText: "ОК",
+                backHref: "/",
+                formAction: "/login"
+            });
         }
     }
     catch (err) {
-        res.status(500).send(err);
+        return res.status(401).render("error", {
+            req: req,
+            errorText: err
+        });
     }
 });
 
 // Страница регистрации
 router.get('/register', unauthorizedOnly, async (req, res) => {
-    let html = `
-        <div class="register-from">
-            <form method="post">
-                <div class="mb-3">
-                    <label for="exampleInputEmail1" class="form-label">Email address</label>
-                    <input name="email" type="email" class="form-control" aria-describedby="emailHelp">
-                    <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
-                </div>
-                <div class="mb-3">
-                    <label for="exampleInputEmail1" class="form-label">Nickname</label>
-                    <input name="name" type="text" class="form-control" aria-describedby="nickname">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Password</label>
-                    <input name="password" type="password" class="form-control">
-                </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input">
-                    <label name="gay" class="form-check-label">Я гей!</label>
-                </div>
-                <div class="buttons-group">
-                    <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
-                </div>
-            </form>
-        </div>`;
-
-    res.send(renderForm("Регистрация", html, req));
+    res.render("auth/register", { req: req });
 });
 
 // Страница авторизации
 router.get('/login', unauthorizedOnly, async (req, res) => {
-    let html = `
-        <div class="login-from">
-            <form method="post">
-                <div class="mb-3">
-                    <label for="exampleInputEmail1" class="form-label">Email address</label>
-                    <input name="email" type="email" class="form-control" aria-describedby="emailHelp">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Password</label>
-                    <input name="password" type="password" class="form-control">
-                </div>
-                <div class="buttons-group">
-                    <button type="submit" class="btn btn-primary">Авторизироваться</button>
-                </div>
-            </form>
-        </div>`;
-
-    res.send(renderForm("Авторизация", html, req));
+    res.render("auth/login", { req: req });
 });

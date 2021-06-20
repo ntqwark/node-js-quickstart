@@ -35,6 +35,10 @@ header {
   min-height: auto !important;
 }
 
+.input-form {
+    width: 500px;
+}
+
 .auth {
   float: right;
   display: flex;

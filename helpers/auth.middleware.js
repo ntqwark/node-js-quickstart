@@ -34,7 +34,10 @@ exports.loggedIn = async function (req, res, next) {
         next();
     }
     catch (err) {
-        res.status(400).send(err);
+        return res.status(401).render("error", {
+            req: req,
+            errorText: err
+        });
     }
 }
 

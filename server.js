@@ -7,10 +7,36 @@ const cookieParser = require('cookie-parser');
 const handlebars = require('express-handlebars');
 
 const app = express();
+const email = require("./helpers/email.sender");
+const { create } = require("domain");
 
 app.engine(
     'handlebars',
-    handlebars({ defaultLayout: 'main' })
+    handlebars({
+        defaultLayout: 'main',
+        helpers: {
+            createPagesList: function (page, maxPage = 10000) {
+                page = parseInt(page);
+
+                var pages = [];
+                var result = "";
+
+                if (page == 1) {
+                    for (let i = 1; i < 4; i++) {
+                        if (i == page) result += `<a class="page" style="color: black" href="/admin/log?page=${i}"><b>${i}</b></a>`;
+                        else result += `<a class="page" style="color: black" href="/admin/log?page=${i}">${i}</a>`;
+                    }
+                } else {
+                    for (let i = page - 1; i < page + 2; i++) {
+                        if (i == page) result += `<a class="page" style="color: black" href="/admin/log?page=${i}"><b>${i}</b></a>`;
+                        else result += `<a class="page" style="color: black" href="/admin/log?page=${i}">${i}</a>`;
+                    }
+                }
+
+                return `<div class="page-selector">${result}</div>`
+            }
+        }
+    })
 );
 
 app.set('views', './views');
