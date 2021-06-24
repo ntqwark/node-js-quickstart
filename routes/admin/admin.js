@@ -28,7 +28,11 @@ router.get('/raw-log:id?', adminOnly, async (req, res) => {
         let str = JSON.stringify(log);
         str = str.replace(/\\n/g, "<br>")
 
-        res.send(str);
+        res.render("admin/rawlog", {
+            req: req,
+            body: str
+        });
+
     } catch (err) {
         res.status(401).render("error", {
             req: req,
