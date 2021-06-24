@@ -25,12 +25,10 @@ router.get('/raw-log:id?', adminOnly, async (req, res) => {
         let rows = await sql.query("SELECT * FROM actions WHERE actionid = ?", req.query.id);
         let log = rows[0];
 
-        let str = JSON.stringify(log);
-        str = str.replace(/\\n/g, "<br>")
-
         res.render("admin/rawlog", {
             req: req,
-            body: str
+            body: JSON.stringify(log),
+            backHref: "/admin/log"
         });
 
     } catch (err) {
